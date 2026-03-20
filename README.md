@@ -46,6 +46,7 @@ GET /api/v1/todos
 ### Get a particular task
 ```http
 GET /api/v1/todos/:id
+```
 
 ### Create a new task
 ```http
@@ -68,7 +69,7 @@ PUT /api/v1/tasks/:id
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/taskmaster-api.git
+   git clone git@github.com:DGashaw/todo-api.git
    ```
 2. **Install dependencies:**
    ```bash
