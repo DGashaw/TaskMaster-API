@@ -69,7 +69,7 @@ PUT /api/v1/tasks/:id
 
 1. **Clone the repository:**
    ```bash
-   git clone git@github.com:DGashaw/todo-api.git
+   git clone git@github.com:DGashaw/TaskMaster-API.git
    ```
 2. **Install dependencies:**
    ```bash
