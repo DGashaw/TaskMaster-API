@@ -60,7 +60,7 @@ Content-Type: application/json
 
 ### Update a task
 ```http
-PUT /api/v1/tasks/:id
+PATCH /api/v1/tasks/:id
 ```
 
 ---
@@ -84,7 +84,8 @@ PUT /api/v1/tasks/:id
    ```
 4. **Run the server:**
    ```bash
-   npm start
+   npm start - runs the API in production enviroment
+   npm run development - runs the API in development enviroment
    ```
 
 ---
