@@ -40,17 +40,17 @@ To interact with the API, you must include a valid key in the request header. Th
 
 ### Get all tasks
 ```http
-GET /api/v1/todos
+GET /api/v1/tasks
 ```
 
 ### Get a particular task
 ```http
-GET /api/v1/todos/:id
+GET /api/v1/tasks/:id
 ```
 
 ### Create a new task
 ```http
-POST /api/v1/todos
+POST /api/v1/tasks
 Content-Type: application/json
 
 {
