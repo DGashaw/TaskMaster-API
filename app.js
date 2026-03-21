@@ -5,15 +5,23 @@ const taskApiRoutes = require("./routes/taskApiRoutes.js");
 const morgan = require("morgan");
 const rfs = require("rotating-file-stream");
 const path = require("node:path");
+const cors = require("cors");
 
 
 require('dotenv').config();
 require("./config/dbConnect.js").dbConnect;
 
+const corsOptions = {
+  "origin": "*",
+  "methods": "GET,PATCH,POST,DELETE",
+  "preflightContinue": false,
+  "optionsSuccessStatus": 204
+}
 
 
 
 app.use(bodyParser.json());
+app.use(cors(corsOptions));
 
 switch(app.get("env")){
     case "development":
