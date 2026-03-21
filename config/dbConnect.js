@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const DEBUG = require("debug");
+
 
 const enviroment = process.env.NODE_ENV;
 
@@ -11,8 +13,9 @@ if(enviroment === "development"){
         throw new Error(error);
     }
 }
-else if(enviroment === "test"){
-   console.log("Tests are underway ...");
+else if(enviroment === "production"){
+   mongoose.connect(process.env.MONGODB_URI);
+        console.log("Successfully connected to the database");
 }
 
  

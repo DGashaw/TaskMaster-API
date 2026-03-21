@@ -1,4 +1,4 @@
-const {createTask, getTasks, updateTask} = require("../controller/taskApiController.js");
+const {createTask, getTasks, updateTask, deleteTask} = require("../controller/taskApiController.js");
 const express = require("express");
 const router = express.Router();
 
@@ -17,5 +17,10 @@ router.route("/tasks/:id", (request, response, next) => {
     next();
 })
     .patch(updateTask);
+
+router.route("/tasks/:id", (request, response, next) => {
+    next();
+})
+    .delete(deleteTask);
 
 module.exports = router;
