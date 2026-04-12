@@ -5,8 +5,13 @@
   "main": "app.js",
   "scripts": {
     "test": "export NODE_ENV=test && mocha **/*.test.js",
+    "test-coverage": "nyc npm test",
     "start": "export NODE_ENV=production && nodemon ./server/server.js",
-    "development": "export NODE_ENV=development && nodemon ./server/server.js"
+    "development": "export NODE_ENV=development && nodemon ./server/server.js",
+    "lint": "standard",
+    "lint-fix": "standard --fix",
+    "infrastructure-start": "docker compose up -d --build",
+    "infrastructure-down": "docker compose down --remove-orphans"
   },
   "keywords": [
     "todo",
@@ -30,6 +35,8 @@
     "mocha": "^11.7.5",
     "mongodb-memory-server": "^11.0.1",
     "nodemon": "^3.1.14",
+    "nyc": "^18.0.0",
+    "standard": "^17.1.2",
     "supertest": "^7.2.2"
   }
 }

@@ -1,181 +1,166 @@
-const request = require("supertest");
-const {expect, assert} = require("chai");
-const {app} = require("../app");
-const {mongoose } = require("mongoose");
-const {MongoMemoryServer} = require("mongodb-memory-server");
+const request = require('supertest')
+const { expect, assert } = require('chai')
+const { app } = require('../app')
+const { mongoose } = require('mongoose')
+const { MongoMemoryServer } = require('mongodb-memory-server')
 
-let mongoServer = null;
-let name = null;
-let id = null;
+let mongoServer = null
+let name = null
+let id = null
 
-describe("POST /api/v1/tasks", () => {
-    before(async () => {
-        mongoServer = await MongoMemoryServer.create();
-        const uri = mongoServer.getUri();
-        await mongoose.connect(uri);
-    });
+describe('POST /api/v1/tasks', () => {
+  before(async () => {
+    mongoServer = await MongoMemoryServer.create()
+    const uri = mongoServer.getUri()
+    await mongoose.connect(uri)
+  })
 
-    it("should create a new todo item when the api-key is correct", async () => {
-        name = "Walking the dog";
+  it('should create a new todo item when the api-key is correct', async () => {
+    name = 'Walking the dog'
 
-        const response = await request(app)
-            .post("/api/v1/tasks")
-            .set("x-api-key", process.env.API_KEY)
-            .send({name});
-        id = await response.body["_id"];
-        
-        expect(response.statusCode)
-            .to.equal(201);
-        expect(response.body.name)
-            .to.be.a('string')
-            .to.equal(name);
-    });
+    const response = await request(app)
+      .post('/api/v1/tasks')
+      .set('x-api-key', process.env.API_KEY)
+      .send({ name })
+    id = await response.body._id
 
-    it("should not create a new todo item for empty task", async () => {
-        const response = await request(app)
-            .post("/api/v1/tasks")
-            .set("x-api-key", process.env.API_KEY)
-            .send({});
-        
-        expect(response.statusCode)
-            .to.equal(400);
-        expect(response.body)
-            .to.be.a("object");
-    })
+    expect(response.statusCode)
+      .to.equal(201)
+    expect(response.body.name)
+      .to.be.a('string')
+      .to.equal(name)
+  })
 
-    it("should not create a new todo item for incorrect/empty api-key", async () => {
-        const response = await request(app)
-            .post("/api/v1/tasks")
-            .set("x-api-key", "")
-            .send({name});
-        
-        expect(response.statusCode).to.equal(401);
-    })
+  it('should not create a new todo item for empty task', async () => {
+    const response = await request(app)
+      .post('/api/v1/tasks')
+      .set('x-api-key', process.env.API_KEY)
+      .send({})
 
-});
+    expect(response.statusCode)
+      .to.equal(400)
+    expect(response.body)
+      .to.be.a('object')
+  })
 
-describe("GET /api/v1/tasks", () => {
+  it('should not create a new todo item for incorrect/empty api-key', async () => {
+    const response = await request(app)
+      .post('/api/v1/tasks')
+      .set('x-api-key', '')
+      .send({ name })
 
-    it("should get all todo items", async () => {
-        const response = await request(app)
-            .get("/api/v1/tasks")
-            .set("x-api-key", process.env.API_KEY);
-        
-        expect(response.statusCode)
-            .to.equal(200);
-        expect(response.body)
-            .to.have.lengthOf(1);
-        expect(response.body[0])
-            .to.have.ownProperty("createdAt");
-    });
+    expect(response.statusCode).to.equal(401)
+  })
+})
 
-    it("should get a todo by its id", async () => {
-        
-        const response = await request(app)
-            .get(`/api/v1/tasks/${id}`)
-            .set("x-api-key", process.env.API_KEY);
-        
-        
-        expect(response.statusCode)
-            .to.equal(200);
-        expect(response.body[0].name)
-            .to.be.a("string")
-            .to.equal(name);
+describe('GET /api/v1/tasks', () => {
+  it('should get all todo items', async () => {
+    const response = await request(app)
+      .get('/api/v1/tasks')
+      .set('x-api-key', process.env.API_KEY)
 
-    });
+    expect(response.statusCode)
+      .to.equal(200)
+    expect(response.body)
+      .to.have.lengthOf(1)
+    expect(response.body[0])
+      .to.have.ownProperty('createdAt')
+  })
 
-    it("should not get any tasks for invalid/empty api-key", async () => {
-         const response = await request(app)
-            .get(`/api/v1/tasks/${id}`)
-            .set("x-api-key", "wrong-api-key");
-        
-        
-        expect(response.statusCode)
-            .to.equal(401);
-        
-        assert.ifError(response.text.error);
-        assert.notPropertyVal(response, "body");
-        
-    })
-});
+  it('should get a todo by its id', async () => {
+    const response = await request(app)
+      .get(`/api/v1/tasks/${id}`)
+      .set('x-api-key', process.env.API_KEY)
 
-describe("PATCH /api/v1/tasks/:id", () =>{
-    
-    it("should update the task with the specified for the valid api-key", async () => {
-        //should();
-        
-        
-        name = "postman updated task";
-        let response = await request(app)
-            .patch(`/api/v1/tasks/${id}`)
-            .set("x-api-key", process.env.API_KEY)
-            .send({name});
-        
-        expect(response.statusCode).to.equal(200);
-        expect(response.body.name).to.equal(name);
-        
-    });
+    expect(response.statusCode)
+      .to.equal(200)
+    expect(response.body[0].name)
+      .to.be.a('string')
+      .to.equal(name)
+  })
 
-    it("should not update the task with a wrong/undefined id", async () => {
+  it('should not get any tasks for invalid/empty api-key', async () => {
+    const response = await request(app)
+      .get(`/api/v1/tasks/${id}`)
+      .set('x-api-key', 'wrong-api-key')
 
-        newId = new mongoose.Types.ObjectId();
+    expect(response.statusCode)
+      .to.equal(401)
 
+    assert.ifError(response.text.error)
+    assert.notPropertyVal(response, 'body')
+  })
+})
 
-        newName = "postman second updated task";
-        
-        let response = await request(app)
-            .patch(`/api/v1/tasks/${newId}`)
-            .set("x-api-key", process.env.API_KEY)
-            .send({"name": newName});
-        
-        expect(response.statusCode).to.equal(404);
-        expect(response.body).to.equal("");
-    });
+describe('PATCH /api/v1/tasks/:id', () => {
+  it('should update the task with the specified for the valid api-key', async () => {
+    // should();
 
-    it("should not update a task with empty/invalid api-key", async () => {
-        const response = await request(app)
-            .patch(`/api/v1/tasks/${id}`)
-            .set("x-api-key", "invalid-api-key");
-        
-       expect(response.statusCode).to.equal(401);
-       assert.ifError(response.text.error);
-    })
+    name = 'postman updated task'
+    const response = await request(app)
+      .patch(`/api/v1/tasks/${id}`)
+      .set('x-api-key', process.env.API_KEY)
+      .send({ name })
 
-});
+    expect(response.statusCode).to.equal(200)
+    expect(response.body.name).to.equal(name)
+  })
 
-describe("DELETE /api/v1/tasks/:id", () => {
-    it("should not delete a task with uknown id", async () => {
-        let newId = new mongoose.Types.ObjectId();
+  it('should not update the task with a wrong/undefined id', async () => {
+    newId = new mongoose.Types.ObjectId()
 
-        const response = await request(app)
-            .delete(`/api/v1/tasks/${newId}`)
-            .set("x-api-key", process.env.API_KEY);
+    newName = 'postman second updated task'
 
-        expect(response.statusCode).to.equal(404);
-    });
+    const response = await request(app)
+      .patch(`/api/v1/tasks/${newId}`)
+      .set('x-api-key', process.env.API_KEY)
+      .send({ name: newName })
 
-    it("should not delete a task with specified id with wrong/empty api-key", async () => {
-        const response = await request(app)
-            .delete(`/api/v1/tasks/${id}`)
-            .set("x-api-key", "todo-api-key")
+    expect(response.statusCode).to.equal(404)
+    expect(response.body).to.equal('')
+  })
 
-        expect(response.statusCode).to.equal(401);
-    })
-    
-    it("should delete a task with a known id and correct api-key", async () => {
-        const response = await request(app)
-            .delete(`/api/v1/tasks/${id}`)
-            .set("x-api-key", process.env.API_KEY);
+  it('should not update a task with empty/invalid api-key', async () => {
+    const response = await request(app)
+      .patch(`/api/v1/tasks/${id}`)
+      .set('x-api-key', 'invalid-api-key')
 
-        expect(response.statusCode).to.equal(200);
-        expect(response.body["_id"]).to.equal(id);
-    })
+    expect(response.statusCode).to.equal(401)
+    assert.ifError(response.text.error)
+  })
+})
 
-    after(async () => {
-        await mongoose.connection.dropDatabase();
-        await mongoose.connection.close();
-        await mongoServer.stop();
-    });
-});
+describe('DELETE /api/v1/tasks/:id', () => {
+  it('should not delete a task with uknown id', async () => {
+    const newId = new mongoose.Types.ObjectId()
 
+    const response = await request(app)
+      .delete(`/api/v1/tasks/${newId}`)
+      .set('x-api-key', process.env.API_KEY)
 
+    expect(response.statusCode).to.equal(404)
+  })
+
+  it('should not delete a task with specified id with wrong/empty api-key', async () => {
+    const response = await request(app)
+      .delete(`/api/v1/tasks/${id}`)
+      .set('x-api-key', 'todo-api-key')
+
+    expect(response.statusCode).to.equal(401)
+  })
+
+  it('should delete a task with a known id and correct api-key', async () => {
+    const response = await request(app)
+      .delete(`/api/v1/tasks/${id}`)
+      .set('x-api-key', process.env.API_KEY)
+
+    expect(response.statusCode).to.equal(200)
+    expect(response.body._id).to.equal(id)
+  })
+
+  after(async () => {
+    await mongoose.connection.dropDatabase()
+    await mongoose.connection.close()
+    await mongoServer.stop()
+  })
+})

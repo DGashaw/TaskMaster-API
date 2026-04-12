@@ -1,26 +1,26 @@
-const {createTask, getTasks, updateTask, deleteTask} = require("../controller/taskApiController.js");
-const express = require("express");
-const router = express.Router();
+const { createTask, getTasks, updateTask, deleteTask } = require('../controller/taskApiController.js')
+const express = require('express')
+const router = express.Router()
 
-router.route("/tasks", (request, response, next) =>{
-    next();
+router.route('/tasks', (request, response, next) => {
+  next()
 })
- .post(createTask)
- .get(getTasks);
+  .post(createTask)
+  .get(getTasks)
 
-router.route("/tasks/:id", (request, response, next) => {
-    next();
+router.route('/tasks/:id', (request, response, next) => {
+  next()
 })
-    .get(getTasks);
+  .get(getTasks)
 
-router.route("/tasks/:id", (request, response, next) => {
-    next();
+router.route('/tasks/:id', (request, response, next) => {
+  next()
 })
-    .patch(updateTask);
+  .patch(updateTask)
 
-router.route("/tasks/:id", (request, response, next) => {
-    next();
+router.route('/tasks/:id', (request, response, next) => {
+  next()
 })
-    .delete(deleteTask);
+  .delete(deleteTask)
 
-module.exports = router;
+module.exports = router

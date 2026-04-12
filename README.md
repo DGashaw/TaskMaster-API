@@ -65,6 +65,34 @@ PATCH /api/v1/tasks/:id
 
 ---
 
+## 🐳 Docker Setup (Development)
+
+The TaskMaster-API includes Docker Compose configuration for running MongoDB in a containerized environment during development.
+
+### Prerequisites
+- [Docker](https://www.docker.com/products/docker-desktop) installed and running
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
+### Starting Infrastructure
+
+```bash
+# Start MongoDB container in the background
+npm run infrastructure-start
+
+# Stop MongoDB container
+npm run infrastructure-down
+```
+
+### Docker Configuration
+
+The `docker-compose.yml` file defines:
+- **Service:** MongoDB (latest image)
+- **Container Name:** `taskmaster-mongodb`
+- **Port:** `27017` (accessible at `localhost:27017`)
+- **Data Volume:** `./data` (persisted on your local machine)
+
+---
+
 ## ⚙️ Installation & Setup
 
 1. **Clone the repository:**
@@ -75,17 +103,41 @@ PATCH /api/v1/tasks/:id
    ```bash
    npm install
    ```
-3. **Configure Environment:**
-   Create a `.env` file in the root directory and add:
+3. **Start MongoDB (Development Only):**
+   ```bash
+   npm run infrastructure-start
+   ```
+4. **Configure Environment:**
+   Create a `.env` file in the root directory:
    ```env
    PORT=3000
    API_KEY=your_super_secret_key
-   MONGODB_DEVELOPMENT_CONNECTION_STR=your mongodb connection string
+   NODE_ENV=development
+   MONGODB_DEVELOPMENT_CONNECTION_STR=mongodb://localhost:27017/taskmaster
+   MONGODB_URI=your_production_mongodb_connection_string
    ```
-4. **Run the server:**
+   
+   > **Note:** When running locally with Docker, use `mongodb://localhost:27017/taskmaster` for `MONGODB_DEVELOPMENT_CONNECTION_STR`
+
+5. **Run the server:**
    ```bash
-   npm start - runs the API in production enviroment
-   npm run development - runs the API in development enviroment
+   # Development mode (with nodemon and local Docker MongoDB)
+   npm run development
+   
+   # Production mode (requires MONGODB_URI in .env)
+   npm start
    ```
+
+---
+
+## 🧪 Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests with coverage report
+npm test-coverage
+```
 
 ---
