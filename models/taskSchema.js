@@ -10,6 +10,6 @@ const todoSchema = new Schema({
   timestamps: true
 })
 
-const Todo = model('Todo', todoSchema)
+const Task = model('Todo', todoSchema)
 
-module.exports = Todo
+module.exports = { Task }

@@ -140,4 +140,15 @@ npm test
 npm test-coverage
 ```
 
----
+### Database Tests in Development Mode
+The `database.test.js` file includes tests that connect to a real MongoDB instance in development mode. Before running these tests, ensure a Docker containerized MongoDB instance is running:
+
+```bash
+# Using the provided script
+npm run infrastructure-start
+
+# Or manually
+docker run -d -p 27017:27017 --name mongodb mongo:latest
+```
+
+> **Note:** Tests in 'test' environment use an in-memory MongoDB (via `mongodb-memory-server`), so no external database is required for other test files.

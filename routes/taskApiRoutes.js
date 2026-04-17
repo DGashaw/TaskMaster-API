@@ -12,15 +12,7 @@ router.route('/tasks/:id', (request, response, next) => {
   next()
 })
   .get(getTasks)
-
-router.route('/tasks/:id', (request, response, next) => {
-  next()
-})
   .patch(updateTask)
-
-router.route('/tasks/:id', (request, response, next) => {
-  next()
-})
   .delete(deleteTask)
 
 module.exports = router

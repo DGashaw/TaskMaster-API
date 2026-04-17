@@ -1,14 +1,22 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const app = express()
 const taskApiRoutes = require('./routes/taskApiRoutes.js')
 const morgan = require('morgan')
 const rfs = require('rotating-file-stream')
 const path = require('node:path')
 const cors = require('cors')
 
+const app = express()
+const debug = require('debug')('taskMaster:app')
+
+let databaseStatus = null
+
 require('dotenv').config()
-require('./config/dbConnect.js').dbConnect
+const { connectToDatabase } = require('./config/dbConnect.js')
+
+if (process.env.NODE_ENV !== 'test') {
+  databaseStatus = connectToDatabase(process.env.NODE_ENV)
+}
 
 const corsOptions = {
   origin: '*',
@@ -46,4 +54,36 @@ switch (app.get('env')) {
 }
 app.use('/api/v1', taskApiRoutes)
 
-module.exports = { app }
+app.use((req, res, next) => {
+  const error = new Error('Not Found')
+  error.status = 404
+  next(error)
+})
+
+app.use((error, request, response, next) => {
+  response.status(error.status || 500)
+  next(error)
+})
+
+const env = app.get('env')
+if (env === 'development' || env === 'test') {
+  app.set('content-type', 'application/json')
+  app.use((error, request, response, next) => {
+    response.json({
+      error: {
+        message: error.message,
+        stack: error.stack
+      }
+    })
+  })
+} else if (env === 'production') {
+  app.use((error, request, response, next) => {
+    response.json({
+      error: {
+        message: error.message
+      }
+    })
+  })
+};
+
+module.exports = { app, databaseStatus }

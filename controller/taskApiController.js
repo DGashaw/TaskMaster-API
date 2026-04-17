@@ -1,39 +1,38 @@
-const Task = require('../models/taskSchema')
+const { createNewTask, getAllTasks, updateTaskById, removeTaskById } = require('../database/database')
+const debug = require('debug')('taskMaster:controller:taskApiController')
 
-const createTask = async (request, response) => {
+const createTask = async (request, response, next) => {
   response.set({ 'content-type': 'json' })
-  let responseObject = null
 
   if (process.env.API_KEY !== request.headers['x-api-key']) {
-    response.status(401)
-    responseObject = { error: new Error('Inavlid API Key') }
+    const error = new Error('Inavlid API Key')
+    error.status = 401
+    return next(error)
   } else {
     try {
       if (request?.body?.name) {
-        const task = new Task({ ...request.body, completed: false })
-
-        responseObject = await task.save()
+        responseObject = await createNewTask(request.body.name)
         response.status(201)
+        response.json(responseObject)
       } else {
-        response.status(400)
-        responseObject = { error: new Error('No todo item found in the body') }
+        const error = new Error('No todo item found in the body')
+        error.status = 400
+        return next(error)
       }
     } catch (error) {
-      responseObject = { error }
-      response.status(500)
+      error.status = error.status || 500
+      return next(error)
     }
   }
-
-  response.send(responseObject)
 }
 
-const getTasks = async (request, response) => {
+const getTasks = async (request, response, next) => {
   response.set({ 'content-type': 'application/json' })
-  let responseObject = null
 
   if (process.env.API_KEY !== request.headers['x-api-key']) {
-    response.status(401)
-    responseObject = { error: new Error('Inavlid API Key') }
+    const error = new Error('Invalid API Key')
+    error.status = 401
+    return next(error)
   } else {
     try {
       let filter = {}
@@ -42,64 +41,89 @@ const getTasks = async (request, response) => {
         filter = { _id: id }
       }
 
-      responseObject = await Task.find(filter)
-      response.statusCode = responseObject[0]._id ? 200 : 404
+      responseObject = await getAllTasks(filter)
+      if (responseObject[0]?._id) {
+        response.status(200)
+        response.json(responseObject)
+      } else {
+        const error = new Error('Task not found')
+        error.status = 404
+        return next(error)
+      }
     } catch (error) {
-      response.status(500)
-      responseObject = { error }
+      error.status = error.status || 500
+      return next(error)
     }
   }
-
-  response.send(responseObject)
 }
 
-const updateTask = async (request, response) => {
+const updateTask = async (request, response, next) => {
   response.set({ 'content-type': 'application/json' })
   responseObject = null
 
   if (process.env.API_KEY !== request.headers['x-api-key'].toString().trim()) {
-    response.status(401)
-    responseObject = { error: new Error('Inavlid API Key') }
+    const error = new Error('Invalid API Key')
+    error.status = 401
+    return next(error)
   } else {
     try {
       const id = request.params?.id.toString().trim()
       const updateObject = request?.body
 
-      if (!id && !updateObject) {
-        responseObject = { error: new Error('Missing object id or update object') }
+      if (!id) {
+        const error = new Error('Missing object id')
+        error.status = 400
+        return next(error)
+      } else if (!updateObject) {
+        const error = new Error('Missing update object')
+        error.status = 400
+        return next(error)
       } else {
-        responseObject = await Task.findByIdAndUpdate({ _id: id }, { $set: updateObject }, { returnDocument: 'after', upsert: false })
+        responseObject = await updateTaskById(id, updateObject)
+        if (!responseObject?._id) {
+          const error = new Error('Task not found')
+          error.status = 404
+          return next(error)
+        } else {
+          response.status(200)
+          response.json(responseObject)
+        }
       }
-      response.statusCode = responseObject?._id ? 200 : 404
     } catch (error) {
-      responseObject = { error }
-      response.statusCode = 500
+      error.status = error.status || 500
+      return next(error)
     }
   }
-
-  response.send(responseObject)
 }
 
-const deleteTask = async (request, response) => {
+const deleteTask = async (request, response, next) => {
   if (process.env.API_KEY !== request.headers['x-api-key']) {
-    response.status(401)
-    responseObject = { error: new Error('Inavlid API Key') }
+    const error = new Error('Invalid API Key')
+    error.status = 401
+    return next(error)
   } else {
     try {
       const id = request?.params?.id
       if (!id) {
-        responseObject = { error: new Error('Missing object id') }
+        const error = new Error('Missing object id')
+        error.status = 400
+        return next(error)
       } else {
-        responseObject = await Task.findByIdAndDelete(id)
+        responseObject = await removeTaskById(id)
+        if (!responseObject?._id) {
+          const error = new Error('Task not found')
+          error.status = 404
+          return next(error)
+        } else {
+          response.status(200)
+          response.json(responseObject)
+        }
       }
-
-      response.statusCode = responseObject?.name ? 200 : 404
     } catch (error) {
-      response.status(500)
-      responseObject = { error }
+      error.status = error.status || 500
+      return next(error)
     }
   }
-  response.send(responseObject)
 }
 
 module.exports = {
