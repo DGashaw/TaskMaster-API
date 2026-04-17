@@ -8,6 +8,7 @@ const cors = require('cors')
 
 const app = express()
 const debug = require('debug')('taskMaster:app')
+const { apiAuthenticationRequired } = require('./utility/apiAuthentication.js')
 
 let databaseStatus = null
 
@@ -52,7 +53,7 @@ switch (app.get('env')) {
     app.use(morgan, { stream })
     break
 }
-app.use('/api/v1', taskApiRoutes)
+app.use('/api/v1', apiAuthenticationRequired, taskApiRoutes)
 
 app.use((req, res, next) => {
   const error = new Error('Not Found')

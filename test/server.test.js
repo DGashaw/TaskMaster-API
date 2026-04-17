@@ -115,7 +115,7 @@ describe('GET /api/v1/tasks', () => {
       .set('x-api-key', process.env.API_KEY)
 
     expect(response.statusCode)
-      .to.equal(500)
+      .to.equal(400)
   })
 
   it('should not get any task for a non existing id', async () => {
@@ -163,7 +163,7 @@ describe('PATCH /api/v1/tasks/:id', () => {
       .set('x-api-key', process.env.API_KEY)
       .send({ name: 'postman updated task' })
 
-    expect(response.statusCode).to.equal(500)
+    expect(response.statusCode).to.equal(400)
     assert.ifError(response.text.error)
   })
 
@@ -193,7 +193,7 @@ describe('DELETE /api/v1/tasks/:id', () => {
       .delete('/api/v1/tasks/123')
       .set('x-api-key', process.env.API_KEY)
 
-    expect(response.statusCode).to.equal(500)
+    expect(response.statusCode).to.equal(400)
   })
 
   it('should not delete a task with specified id with wrong/empty api-key', async () => {
@@ -214,6 +214,7 @@ describe('DELETE /api/v1/tasks/:id', () => {
   })
 
   after(async () => {
+
     await disconnectFromDatabase('test', mongoServer)
   })
 })

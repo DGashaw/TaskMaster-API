@@ -1,128 +1,133 @@
 const { createNewTask, getAllTasks, updateTaskById, removeTaskById } = require('../database/database')
+const validator = require('validator');
+
 const debug = require('debug')('taskMaster:controller:taskApiController')
 
 const createTask = async (request, response, next) => {
   response.set({ 'content-type': 'json' })
-
-  if (process.env.API_KEY !== request.headers['x-api-key']) {
-    const error = new Error('Inavlid API Key')
-    error.status = 401
-    return next(error)
-  } else {
-    try {
-      if (request?.body?.name) {
-        responseObject = await createNewTask(request.body.name)
-        response.status(201)
-        response.json(responseObject)
-      } else {
-        const error = new Error('No todo item found in the body')
-        error.status = 400
-        return next(error)
-      }
-    } catch (error) {
-      error.status = error.status || 500
+  try {
+    if (request?.body?.name) {
+      let responseObject = await createNewTask(request.body.name)
+      response.status(201)
+      response.json(responseObject)
+    } else {
+      const error = new Error('No todo item found in the body')
+      error.status = 400
       return next(error)
     }
+  } catch (error) {
+    error.status = error.status || 500
+    return next(error)
   }
 }
 
 const getTasks = async (request, response, next) => {
   response.set({ 'content-type': 'application/json' })
-
-  if (process.env.API_KEY !== request.headers['x-api-key']) {
-    const error = new Error('Invalid API Key')
-    error.status = 401
-    return next(error)
-  } else {
-    try {
-      let filter = {}
-      if (request?.params?.id) {
-        const id = request.params.id.toString().trim()
+  try {
+    let filter = {}
+    if (request?.params?.id) {
+      const id = request.params.id.toString().trim()
+      if(validator.isMongoId(id)) {
         filter = { _id: id }
-      }
 
-      responseObject = await getAllTasks(filter)
-      if (responseObject[0]?._id) {
-        response.status(200)
-        response.json(responseObject)
-      } else {
-        const error = new Error('Task not found')
-        error.status = 404
+        let responseObject = await getAllTasks(filter)
+        if (responseObject[0]?._id) {
+          response.status(200)
+          response.json(responseObject)
+        } else {
+          const error = new Error('Task not found')
+          error.status = 404
+          return next(error)
+        }
+      } 
+      else {
+        const error = new Error('Invalid object id')
+        error.status = 400
         return next(error)
       }
-    } catch (error) {
-      error.status = error.status || 500
-      return next(error)
+    } else {
+      // Get all tasks when no ID is provided
+      let responseObject = await getAllTasks(filter)
+      response.status(200)
+      response.json(responseObject)
     }
+  } catch (error) {
+    error.status = error.status || 500
+    return next(error)
   }
+
 }
 
 const updateTask = async (request, response, next) => {
   response.set({ 'content-type': 'application/json' })
-  responseObject = null
+  try {
+    const id = request.params?.id.toString().trim()
+    const updateObject = request?.body
 
-  if (process.env.API_KEY !== request.headers['x-api-key'].toString().trim()) {
-    const error = new Error('Invalid API Key')
-    error.status = 401
-    return next(error)
-  } else {
-    try {
-      const id = request.params?.id.toString().trim()
-      const updateObject = request?.body
-
-      if (!id) {
-        const error = new Error('Missing object id')
+    if (!id) {
+      const error = new Error('Missing object id')
+      error.status = 400
+      return next(error)
+    } 
+    else if (!updateObject) {
+      const error = new Error('Missing update object')
+      error.status = 400
+      return next(error)
+    } 
+    else {
+      if (!validator.isMongoId(id)) {
+        const error = new Error('Invalid object id')
         error.status = 400
         return next(error)
-      } else if (!updateObject) {
-        const error = new Error('Missing update object')
-        error.status = 400
+      }
+
+      let responseObject = await updateTaskById(id, updateObject)
+      if (!responseObject?._id) {
+        const error = new Error('Task not found')
+        error.status = 404
         return next(error)
       } else {
-        responseObject = await updateTaskById(id, updateObject)
-        if (!responseObject?._id) {
-          const error = new Error('Task not found')
-          error.status = 404
-          return next(error)
-        } else {
-          response.status(200)
-          response.json(responseObject)
-        }
+        response.status(200)
+        response.json(responseObject)
       }
-    } catch (error) {
-      error.status = error.status || 500
-      return next(error)
     }
+  } 
+  catch (error) {
+    error.status = error.status || 500
+    return next(error)
   }
 }
 
 const deleteTask = async (request, response, next) => {
-  if (process.env.API_KEY !== request.headers['x-api-key']) {
-    const error = new Error('Invalid API Key')
-    error.status = 401
-    return next(error)
-  } else {
-    try {
-      const id = request?.params?.id
-      if (!id) {
-        const error = new Error('Missing object id')
+  response.set({ 'content-type': 'application/json' })
+  try {
+    const id = request?.params?.id
+    if (!id) {
+      const error = new Error('Missing object id')
+      error.status = 400
+      return next(error)
+    } 
+    else {
+      if (!validator.isMongoId(id)) {
+        const error = new Error('Invalid object id')
         error.status = 400
         return next(error)
-      } else {
-        responseObject = await removeTaskById(id)
-        if (!responseObject?._id) {
-          const error = new Error('Task not found')
-          error.status = 404
-          return next(error)
-        } else {
-          response.status(200)
-          response.json(responseObject)
-        }
       }
-    } catch (error) {
-      error.status = error.status || 500
-      return next(error)
+
+      let responseObject = await removeTaskById(id)
+      if (!responseObject?._id) {
+        const error = new Error('Task not found')
+        error.status = 404
+        return next(error)
+      } 
+      else {
+        response.status(200)
+        response.json(responseObject)
+      }
     }
+  } catch (error) {
+    error.status = error.status || 500
+    return next(error)
   }
 }
 
