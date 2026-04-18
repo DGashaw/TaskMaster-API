@@ -1,6 +1,5 @@
 const mongoose = require('mongoose')
 const { MongoMemoryServer } = require('mongodb-memory-server')
-const debug = require('debug')('taskMaster:database:dbConnect')
 
 // const enviroment = process.env.NODE_ENV
 

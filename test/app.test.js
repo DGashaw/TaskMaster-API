@@ -1,5 +1,6 @@
+/* eslint-env mocha */
 const request = require('supertest')
-const { expect, assert } = require('chai')
+const { expect } = require('chai')
 const { app } = require('../app')
 
 describe('GET / in test mode', () => {
