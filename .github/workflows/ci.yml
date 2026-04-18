@@ -10,7 +10,7 @@ jobs:
       - name: Check code style
         run: npm run lint
       - name: Prepare environment
-        run: npm run infrastructure:start
+        run: npm run infrastructure-start
       - name: Run tests
         run: npm test
         env:
