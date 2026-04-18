@@ -10,9 +10,11 @@ jobs:
       - name: Check code style
         run: npm run lint
       - name: Prepare environment
-        run: npm run infra:start
+        run: npm run infrastructure-start
       - name: Run tests
         run: npm test
         env:
           MONGODB_URI: mongodb://localhost:27017/task-database
+          MONGODB_DEVELOPMENT_CONNECTION_STR: mongodb://localhost:27017/taskmaster
+          API_KEY: task_api_key
           PORT: 3000
