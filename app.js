@@ -7,7 +7,6 @@ const path = require('node:path')
 const cors = require('cors')
 
 const app = express()
-const debug = require('debug')('taskMaster:app')
 const { apiAuthenticationRequired } = require('./utility/apiAuthentication.js')
 
 let databaseStatus = null
@@ -30,7 +29,7 @@ app.use(bodyParser.json())
 app.use(cors(corsOptions))
 
 switch (app.get('env')) {
-  case 'development':
+  case 'development': {
     app.use(morgan(process.env.REQUEST_LOG_FORMAT || 'dev', {
       stream: process.env.REQUEST_LOG_FILE
         ? rfs.RotatingFileStream(path.join(__dirname, process.env.REQUEST_LOG_FILE),
@@ -44,7 +43,8 @@ switch (app.get('env')) {
 
     }))
     break
-  case 'production':
+  }
+  case 'production': {
     const stream = rfs.createStream(process.env.REQUEST_LOG_FILE, {
       size: '10M', // rotate every 10 MegaBytes written
       interval: '1d', // rotate daily
@@ -52,6 +52,7 @@ switch (app.get('env')) {
     })
     app.use(morgan, { stream })
     break
+  }
 }
 app.use('/api/v1', apiAuthenticationRequired, taskApiRoutes)
 

@@ -1,8 +1,8 @@
-const { connectToDatabase, disconnectFromDatabase } = require('../config/dbConnect.js')
+/* eslint-env mocha */
+const { connectToDatabase, disconnectFromDatabase } = require('../config/dbConnect')
 const request = require('supertest')
-const { expect, assert } = require('chai')
+const { expect } = require('chai')
 const { app } = require('../app')
-const debug = require('debug')('taskMaster:test:database.test')
 
 let databaseStatus = null
 let currentEnviroment = null
@@ -34,10 +34,12 @@ describe('Database Connection and routes in development mode', () => {
 
 describe('Database connection for wrong enviroment variable', () => {
   before(async () => {
+    // eslint-disable-next-line no-undef
     error = await connectToDatabase('wrong')
   })
 
   it('should not connect to the database', () => {
+    // eslint-disable-next-line no-undef
     expect(error).to.be.an('error')
   })
 })

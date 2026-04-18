@@ -1,10 +1,9 @@
+/* eslint-env mocha */
 const request = require('supertest')
 const { expect, assert } = require('chai')
 const { app } = require('../app')
 const { mongoose } = require('mongoose')
-const { MongoMemoryServer } = require('mongodb-memory-server')
 const { connectToDatabase, disconnectFromDatabase } = require('../config/dbConnect')
-const debug = require('debug')('taskMaster:test:server.test')
 
 let mongoServer = null
 let name = null
@@ -143,9 +142,9 @@ describe('PATCH /api/v1/tasks/:id', () => {
   })
 
   it('should not update the task with non-existing id', async () => {
-    newId = new mongoose.Types.ObjectId()
+    const newId = new mongoose.Types.ObjectId()
 
-    newName = 'postman second updated task'
+    const newName = 'postman second updated task'
 
     const response = await request(app)
       .patch(`/api/v1/tasks/${newId}`)
@@ -214,7 +213,6 @@ describe('DELETE /api/v1/tasks/:id', () => {
   })
 
   after(async () => {
-
     await disconnectFromDatabase('test', mongoServer)
   })
 })
